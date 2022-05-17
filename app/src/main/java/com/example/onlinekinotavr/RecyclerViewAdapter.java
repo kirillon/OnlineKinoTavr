@@ -1,13 +1,19 @@
 package com.example.onlinekinotavr;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.MemoryPolicy;
@@ -33,6 +39,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         LayoutInflater mInflater = LayoutInflater.from(mContext);
         view = mInflater.inflate(R.layout.list_item, parent,false);
 
+
         return new MyViewHolder(view);
     }
 
@@ -47,7 +54,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 
                 .into(holder.moviePoster);
-
+       holder.cardView.isClickable();
+        System.out.println(holder.cardView.isClickable());
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println(holder.cardView.isClickable());
+                Fragment fragment = new MovieDetailsFragment();
+                Bundle bundle=new Bundle();
+                bundle.putInt("kino_id", mData.get(position).getKino_id());
+                System.out.println(mData.get(position).getKino_id());
+                fragment.setArguments(bundle);
+                AppCompatActivity activity =(AppCompatActivity) mContext;
+                FragmentTransaction transaction =     activity.getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragmentContainerView2, fragment);
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
     }
 
     @Override
@@ -59,11 +84,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         TextView movieTitle;
         TextView movieCounties;
        ImageView moviePoster;
+       CardView cardView;
         public MyViewHolder(View itemView){
             super(itemView);
             movieTitle = (TextView) itemView.findViewById(R.id.card_title);
             movieCounties = (TextView) itemView.findViewById(R.id.card_country);
             moviePoster = (ImageView) itemView.findViewById(R.id.card_poster);
+            cardView = (CardView) itemView.findViewById(R.id.cardView);
+
         }
     }
 }
