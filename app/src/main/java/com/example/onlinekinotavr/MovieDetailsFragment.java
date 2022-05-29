@@ -4,6 +4,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Message;
@@ -46,9 +49,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 @SuppressLint("SetJavaScriptEnabled")
 public class MovieDetailsFragment extends Fragment {
+    List<Movie> lstMovie;
+    LinearLayoutManager mLayoutManager;
+    RecViewAdapter myAdapter;
     int kinopoisk_id;
     String iframeSrc;
     Handler h;
+    Handler h_movie;
     private WebView webView;
     String Title_txt = "";
     String Description_txt = "";
@@ -64,6 +71,7 @@ public class MovieDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        lstMovie = new ArrayList<Movie>();
 
 
 
@@ -72,9 +80,10 @@ public class MovieDetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
         View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
         WebView webView = (WebView) rootView.findViewById(R.id.webView);
-
 
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -82,13 +91,17 @@ public class MovieDetailsFragment extends Fragment {
         webView.getSettings().setCacheMode( WebSettings.LOAD_DEFAULT );
         //webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new MyWebChromeClient());
-        //webView.getSettings().setUseWideViewPort(true);
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+
+
+        webView.getSettings().setUseWideViewPort(true);
         //webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
        // webView.getSettings().setAllowFileAccess(true);
 
 
-        //webView.getSettings().setAllowFileAccessFromFileURLs(true);
-        //webView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        webView.getSettings().setAllowFileAccessFromFileURLs(true);
+        webView.getSettings().setAllowUniversalAccessFromFileURLs(true);
         TextView title = (TextView)rootView.findViewById(R.id.title);
         TextView countries = (TextView)rootView.findViewById(R.id.countries);
         TextView desc = (TextView)rootView.findViewById(R.id.description);
@@ -98,7 +111,20 @@ public class MovieDetailsFragment extends Fragment {
         TextView time = (TextView)rootView.findViewById(R.id.time);
         TextView rate = (TextView)rootView.findViewById(R.id.rate);
         kinopoisk_id = this.getArguments().getInt("kino_id");
+        RecyclerView myrv = rootView .findViewById(R.id.recyclerview);
+        System.out.println(rootView.getContext());
+        myAdapter = new RecViewAdapter(rootView.getContext(),lstMovie);
 
+        mLayoutManager = new LinearLayoutManager(rootView.getContext(), LinearLayoutManager.HORIZONTAL, false);
+        myrv.setLayoutManager(mLayoutManager);
+        myrv.setAdapter(myAdapter);
+        h_movie = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                myAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
         h = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
@@ -135,13 +161,17 @@ public class MovieDetailsFragment extends Fragment {
 
                 return true;
             }
+
         });
 
 
         System.out.println(kinopoisk_id);
-        openMovie();
+
         getInformation();
+        getRec();
         getPersons();
+        openMovie();
+
 
 
         return rootView;
@@ -321,20 +351,86 @@ public class MovieDetailsFragment extends Fragment {
                             e.printStackTrace();
                         }
 
-                    System.out.println(actorList);
-                        actors_txt = String.join(", ",actorList);
-                        directors_txt = String.join(", ",directorList);
-                        h_get.sendEmptyMessage(200);
+
 
 
                     }
+                    System.out.println(actorList);
+                    actors_txt = String.join(", ",actorList);
+                    directors_txt = String.join(", ",directorList);
+                    h_get.sendEmptyMessage(200);
                 }
+
 
             }
 
             ;
         });
     }
+    private void getRec() {
+        OkHttpClient client = new OkHttpClient();
+        String URL = String.format("https://kinopoiskapiunofficial.tech/api/v2.2/films/%s/similars", kinopoisk_id);
+        System.out.println(URL);
+
+        Request request = new Request.Builder()
+
+                .url(URL)
+                .addHeader("accept", "application/json")
+                .addHeader("x-api-key", "a14712c4-725a-4d3b-901d-8f3bbcb9b372")
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String jsonData = Objects.requireNonNull(response.body()).string();
+                    ArrayList<String> directorList = new ArrayList<String>();
+                    ArrayList<String> actorList =  new ArrayList<String>();;
+
+                    JSONArray Jobject = null;
+                    try {
+                        Jobject = new JSONObject(jsonData).getJSONArray("items");
+                        System.out.println(Jobject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+
+                    for (int i = 0; i < Jobject.length(); i++) {
+
+                        try {
+                            JSONObject object = Jobject.getJSONObject(i);
+
+                           System.out.println(object);
+                            lstMovie.add(new Movie(object.getString("nameRu"),"",object.getString("posterUrlPreview"),object.getInt("filmId")));
+
+
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+
+
+
+
+                    }
+                    h_movie.sendEmptyMessage(200);
+
+
+
+            }
+
+
+        }});
+    }
+
 
     private View mCustomView;
 

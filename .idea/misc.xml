@@ -13,9 +13,10 @@
         <entry key="..\:/OnlineKinoTavr/app/src/main/res/drawable/year_background.xml" value="0.22916666666666666" />
         <entry key="..\:/OnlineKinoTavr/app/src/main/res/layout/activity_main.xml" value="0.2957427536231884" />
         <entry key="..\:/OnlineKinoTavr/app/src/main/res/layout/fragment_home.xml" value="0.21302083333333333" />
-        <entry key="..\:/OnlineKinoTavr/app/src/main/res/layout/fragment_movie_details.xml" value="0.5" />
+        <entry key="..\:/OnlineKinoTavr/app/src/main/res/layout/fragment_movie_details.xml" value="0.3574580759046778" />
         <entry key="..\:/OnlineKinoTavr/app/src/main/res/layout/fragment_search.xml" value="0.21302083333333333" />
         <entry key="..\:/OnlineKinoTavr/app/src/main/res/layout/list_item.xml" value="0.2957427536231884" />
+        <entry key="..\:/OnlineKinoTavr/app/src/main/res/layout/rec_item.xml" value="0.25" />
         <entry key="..\:/OnlineKinoTavr/app/src/main/res/menu/nav_menu.xml" value="0.20885416666666667" />
       </map>
     </option>
