@@ -45,7 +45,7 @@ public class RecViewAdapter extends RecyclerView.Adapter<RecViewAdapter.MyViewHo
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        System.out.println("Привет, Мостаква");
+
         holder.movieTitle.setText(mData.get(position).getTitle());
         holder.movieCounties.setText(mData.get(position).getCountries());
         Picasso.with(mContext).setLoggingEnabled(true);
